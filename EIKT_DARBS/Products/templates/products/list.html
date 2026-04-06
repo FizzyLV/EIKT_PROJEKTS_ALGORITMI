@@ -47,13 +47,13 @@
 
   <p class="meta">Rāda {{ products|length }} no {{ total }} rezultātiem. Lapa {{ page }} / {{ total_pages }}</p>
 
-  <div id="results">
+  <div id="results">x
     {% for p in products %}
       <div class="product-card">
         <h3>{{ p.name }}</h3>
         <div>Zīmols: {{ p.company }} — Kategorija: {{ p.category }}</div>
         <div>Cena: {{ p.price }} EUR — Reitings: {{ p.rating }}</div>
-        <div>{% if p.available %}<strong>Pieejams</strong>{% else %}Nav pieejas{% endif %}</div>
+        <div>{% if p.available %}<strong>Pieejams</strong>{% else %}Nav pieejams{% endif %}</div>
         <p>{{ p.description|truncatechars:200 }}</p>
         <small>Pievienots: {{ p.created_at }}</small>
       </div>
