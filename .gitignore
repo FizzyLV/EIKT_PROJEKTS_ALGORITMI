@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+
+# Media files (user uploads)
+media/
+
+# Static files (collected)
+staticfiles/
+
+# Environment variables
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# PyCharm / IntelliJ
+.idea/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Migrations (optional — usually keep these!)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# Testing / coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Cache
+.cache/
+
+# Node (if you use frontend tools later)
+node_modules/
+
+# Collected static root (if different name)
+static/
+
+# Secrets (VERY important)
+secret_key.txt

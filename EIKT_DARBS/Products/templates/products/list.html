@@ -1,0 +1,90 @@
+<!doctype html>
+{% load static %}
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <title>Produktu meklēšana</title>
+  <link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+</head>
+<body>
+  <h1>Produktu meklēšana</h1>
+
+  <form method="get" action="">
+    <input type="text" name="q" placeholder="Meklēt nosaukumā vai aprakstā" value="{{ q }}" size="40">
+
+    <label> Kategorija: <input list="cat-list" name="category" value="{{ category }}"></label>
+    <datalist id="cat-list">
+      {% for c in categories %}
+        <option value="{{ c }}"></option>
+      {% endfor %}
+    </datalist>
+
+    <label> Zīmols: <input list="brand-list" name="brand" value="{{ brand }}"></label>
+    <datalist id="brand-list">
+      {% for b in brands %}
+        <option value="{{ b }}"></option>
+      {% endfor %}
+    </datalist>
+
+    <label> Cena no: <input type="text" name="min_price" size="8" value="{{ min_price }}"></label>
+    <label> līdz: <input type="text" name="max_price" size="8" value="{{ max_price }}"></label>
+
+    <label> Pieejams noliktavā: <input type="checkbox" name="available" value="1" {% if available %}checked{% endif %}></label>
+
+    <label>Kārtot pēc:
+      <select name="sort">
+        <option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>Relevance</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Cena (lēti→dārgi)</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Cena (dārgi→lēti)</option>
+        <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Popularitāte / Reitings</option>
+        <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Pievienošanas datums (jauns)</option>
+        <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Pievienošanas datums (vecāks)</option>
+      </select>
+    </label>
+
+    <button type="submit">Meklēt</button>
+  </form>
+
+  <p class="meta">Rāda {{ products|length }} no {{ total }} rezultātiem. Lapa {{ page }} / {{ total_pages }}</p>
+
+  <div id="results">
+    {% for p in products %}
+      <div class="product-card">
+        <h3>{{ p.name }}</h3>
+        <div>Zīmols: {{ p.company }} — Kategorija: {{ p.category }}</div>
+        <div>Cena: {{ p.price }} EUR — Reitings: {{ p.rating }}</div>
+        <div>{% if p.available %}<strong>Pieejams</strong>{% else %}Nav pieejas{% endif %}</div>
+        <p>{{ p.description|truncatechars:200 }}</p>
+        <small>Pievienots: {{ p.created_at }}</small>
+      </div>
+    {% empty %}
+      <p>Nav atrasts neviens produkts.</p>
+    {% endfor %}
+  </div>
+
+  <div id="pagination">
+    {% if total_pages > 1 %}
+
+      {% if page|add:-1 >= 1 %}
+        <a href="?q={{ q|urlencode }}&category={{ category|urlencode }}&brand={{ brand|urlencode }}&min_price={{ min_price|urlencode }}&max_price={{ max_price|urlencode }}&available={{ available|urlencode }}&sort={{ sort|urlencode }}&page={{ page|add:-1 }}">← Prev</a>
+      {% endif %}
+
+      {% for i in pages %}
+        {% if i == None %}
+          <span class="ellipsis">…</span>
+        {% elif i == page %}
+          <strong>{{ i }}</strong>
+        {% else %}
+          <a href="?q={{ q|urlencode }}&category={{ category|urlencode }}&brand={{ brand|urlencode }}&min_price={{ min_price|urlencode }}&max_price={{ max_price|urlencode }}&available={{ available|urlencode }}&sort={{ sort|urlencode }}&page={{ i }}">{{ i }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page|add:1 <= total_pages %}
+        <a href="?q={{ q|urlencode }}&category={{ category|urlencode }}&brand={{ brand|urlencode }}&min_price={{ min_price|urlencode }}&max_price={{ max_price|urlencode }}&available={{ available|urlencode }}&sort={{ sort|urlencode }}&page={{ page|add:1 }}">Next →</a>
+      {% endif %}
+
+    {% endif %}
+  </div>
+
+</body>
+</html>
