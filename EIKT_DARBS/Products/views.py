@@ -3,7 +3,8 @@ from decimal import Decimal, InvalidOperation
 import re
 import unicodedata
 from .models import Product
-from django.db import connection
+from django.db.models import CharField
+from django.db.models.functions import Cast
 import json
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -53,9 +54,9 @@ def quick_sort(arr, key=lambda x: x, reverse=False):
         return quick_sort(right, key, reverse) + mid + quick_sort(left, key, reverse)
     return quick_sort(left, key, reverse) + mid + quick_sort(right, key, reverse)
 
-
+"""
 def binary_search_left(arr, keyfunc, target):
-    """First index where keyfunc(item) >= target. Used for price range lower bound."""
+    First index where keyfunc(item) >= target. Used for price range lower bound.
     lo, hi = 0, len(arr)
     while lo < hi:
         mid = (lo + hi) // 2
@@ -63,11 +64,11 @@ def binary_search_left(arr, keyfunc, target):
             lo = mid + 1
         else:
             hi = mid
-    return lo
+    return lo 
 
 
 def binary_search_right(arr, keyfunc, target):
-    """One past last index where keyfunc(item) <= target. Used for price range upper bound."""
+    One past last index where keyfunc(item) <= target. Used for price range upper bound.
     lo, hi = 0, len(arr)
     while lo < hi:
         mid = (lo + hi) // 2
@@ -76,7 +77,7 @@ def binary_search_right(arr, keyfunc, target):
         else:
             hi = mid
     return lo
-
+"""
 
 def compute_relevance(prod, tokens):
     """Score how well a product matches search tokens. Name matches worth 5x more than description."""
@@ -124,48 +125,40 @@ def products_search(request):
     except (TypeError, ValueError):
         page = 1
 
-    # Load products from DB
-    try:
-        products = list(Product.objects.all().values(
-            'id', 'company', 'category', 'name', 'name_normalized',
-            'description', 'description_normalized', 'price', 'available', 'rating', 'created_at'
-        ))
-    except InvalidOperation:
-        # Fallback to raw SQL if ORM trips over a malformed Decimal
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT id, company, category, name, name_normalized, description, description_normalized, price, available, rating, created_at FROM Products_product"
-            )
-            cols = [c[0] for c in cursor.description]
-            products = []
-            for row in cursor.fetchall():
-                d = dict(zip(cols, row))
-                d['price']  = parse_decimal(d.get('price'),  Decimal('0.00')) or Decimal('0.00')
-                d['rating'] = parse_decimal(d.get('rating'), Decimal('0.00')) or Decimal('0.00')
-                products.append(d)
+    # Load products from DB using ORM; cast numeric fields to strings to avoid Decimal conversion
+    qs = Product.objects.annotate(
+        price_raw=Cast('price', CharField()),
+        rating_raw=Cast('rating', CharField()),
+    ).values(
+        'id', 'company', 'category', 'name', 'name_normalized',
+        'description', 'description_normalized', 'price_raw', 'available', 'rating_raw', 'created_at'
+    )
+    products = []
+    for row in qs:
+        d = dict(row)
+        d['price']  = parse_decimal(d.pop('price_raw', None),  Decimal('0.00')) or Decimal('0.00')
+        d['rating'] = parse_decimal(d.pop('rating_raw', None), Decimal('0.00')) or Decimal('0.00')
+        products.append(d)
 
     # Collect unique categories and brands for filter dropdowns
     categories = sorted({p.get('category') or '' for p in products} - {''})
     brands     = sorted({p.get('company')  or '' for p in products} - {''})
 
-    # Price range filter using binary search on a sorted list
     available_bool = available.lower() in ('1', 'true', 'yes', 'y', 'on') if available else None
     min_p = parse_decimal(min_price, None)
     max_p = parse_decimal(max_price, None)
 
-    if min_p is not None or max_p is not None:
-        price_sorted = quick_sort(products, key=lambda p: p['price'])
-        low  = binary_search_left( price_sorted, lambda p: p['price'], min_p) if min_p is not None else 0
-        high = binary_search_right(price_sorted, lambda p: p['price'], max_p) if max_p is not None else len(price_sorted)
-        products = price_sorted[low:high]
-
-    # Remaining filters - text search is a linear search through all products
+    # Apply all filters (category, brand, availability, price, text) in one pass: O(n)
     def matches(prod):
         if category and (prod.get('category') or '').strip().lower() != category.lower():
             return False
         if brand and (prod.get('company') or '').strip().lower() != brand.lower():
             return False
         if available_bool is not None and prod.get('available') != available_bool:
+            return False
+        if min_p is not None and prod['price'] < min_p:
+            return False
+        if max_p is not None and prod['price'] > max_p:
             return False
         if tokens:
             name_norm = prod.get('name_normalized') or ''
@@ -174,7 +167,9 @@ def products_search(request):
                 return False
         return True
 
-    filtered = [p for p in products if matches(p)]
+    products = [p for p in products if matches(p)]
+
+    filtered = products
 
     # Score and sort
     if tokens:
@@ -225,7 +220,9 @@ def api_add_product(request):
         data = json.loads(request.body.decode('utf-8') if request.body else '{}')
     except Exception:
         return HttpResponseBadRequest('Invalid JSON')
-    
+
+    def build_product(item):
+        name        = item.get('name', '')
         description = item.get('description', '')
         return Product(
             company                = item.get('company', ''),
