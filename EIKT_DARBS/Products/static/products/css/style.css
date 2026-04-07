@@ -1,0 +1,129 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #f4f5f7;
+  color: #222;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 1.2rem;
+  color: #1a1a2e;
+}
+
+form {
+  background: #fff;
+  border: 1px solid #dde1e9;
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+form input[type="text"],
+form input[list] {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+form input[type="text"]:focus,
+form input[list]:focus {
+  outline: none;
+  border-color: #5b6af0;
+}
+
+form label {
+  font-size: 0.88rem;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+form select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+
+form button {
+  padding: 0.45rem 1.2rem;
+  background: #5b6af0;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+form button:hover { background: #4453d6; }
+
+.meta {
+  font-size: 0.88rem;
+  color: #555;
+  margin-bottom: 0.8rem;
+}
+
+.product-card {
+  background: #fff;
+  border: 1px solid #dde1e9;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.product-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.3rem;
+  color: #1a1a2e;
+}
+
+.product-card div, .product-card p, .product-card small {
+  font-size: 0.87rem;
+  color: #555;
+  margin-top: 0.2rem;
+}
+
+.product-card strong { color: #2a9d5c; }
+
+#pagination {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+#pagination a {
+  padding: 0.3rem 0.7rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  text-decoration: none;
+  color: #5b6af0;
+}
+
+#pagination a:hover { background: #eef; }
+
+#pagination strong {
+  padding: 0.3rem 0.7rem;
+  background: #5b6af0;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+
+#pagination .ellipsis {
+  padding: 0.3rem 0.4rem;
+  color: #999;
+  font-size: 0.88rem;
+}

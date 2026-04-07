@@ -225,9 +225,7 @@ def api_add_product(request):
         data = json.loads(request.body.decode('utf-8') if request.body else '{}')
     except Exception:
         return HttpResponseBadRequest('Invalid JSON')
-
-    def build_product(item):
-        name        = item.get('name', '')
+    
         description = item.get('description', '')
         return Product(
             company                = item.get('company', ''),

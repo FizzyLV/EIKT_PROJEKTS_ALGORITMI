@@ -55,7 +55,6 @@ htmlcov/
 node_modules/
 
 # Collected static root (if different name)
-static/
 
 # Secrets (VERY important)
 secret_key.txt
